@@ -1,0 +1,3 @@
+[submodule "external/modelcontextprotocol-specification"]
+	path = external/modelcontextprotocol-specification
+	url = https://github.com/modelcontextprotocol/specification.git

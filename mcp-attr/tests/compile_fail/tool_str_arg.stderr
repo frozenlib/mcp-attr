@@ -1,0 +1,16 @@
+error: implementation of `serde::de::Deserialize` is not general enough
+  --> tests/compile_fail/tool_str_arg.rs:12:23
+   |
+12 |     async fn f(&self, a: &str) -> Result<String> {
+   |                       ^ implementation of `serde::de::Deserialize` is not general enough
+   |
+   = note: `&str` must implement `serde::de::Deserialize<'0>`, for any lifetime `'0`...
+   = note: ...but `&str` actually implements `serde::de::Deserialize<'1>`, for some specific lifetime `'1`
+
+warning: unused variable: `a`
+  --> tests/compile_fail/tool_str_arg.rs:12:23
+   |
+12 |     async fn f(&self, a: &str) -> Result<String> {
+   |                       ^ help: if this is intentional, prefix it with an underscore: `_a`
+   |
+   = note: `#[warn(unused_variables)]` on by default

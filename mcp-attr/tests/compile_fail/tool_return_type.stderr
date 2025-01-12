@@ -1,0 +1,16 @@
+error[E0277]: the trait bound `mcp_attr::schema::CallToolResult: From<X>` is not satisfied
+  --> tests/compile_fail/tool_return_type.rs:12:26
+   |
+12 |     async fn f(&self) -> Result<X> {
+   |                          ^^^^^^ the trait `From<X>` is not implemented for `mcp_attr::schema::CallToolResult`
+   |
+   = help: the following other types implement trait `From<T>`:
+             `mcp_attr::schema::CallToolResult` implements `From<&CallToolResultContentItem>`
+             `mcp_attr::schema::CallToolResult` implements `From<&mcp_attr::schema::CallToolResult>`
+             `mcp_attr::schema::CallToolResult` implements `From<&mcp_attr::schema::EmbeddedResource>`
+             `mcp_attr::schema::CallToolResult` implements `From<&mcp_attr::schema::ImageContent>`
+             `mcp_attr::schema::CallToolResult` implements `From<&mcp_attr::schema::TextContent>`
+             `mcp_attr::schema::CallToolResult` implements `From<&str>`
+             `mcp_attr::schema::CallToolResult` implements `From<()>`
+             `mcp_attr::schema::CallToolResult` implements `From<CallToolResultContentItem>`
+           and $N others

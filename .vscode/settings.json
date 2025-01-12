@@ -1,0 +1,11 @@
+{
+    "files.watcherExclude": {
+        "/external/**": true
+    },
+    "search.exclude": {
+        "/external/**": true
+    },
+    "files.exclude": {
+        "/external/**": true
+    }
+}

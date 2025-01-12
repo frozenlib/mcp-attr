@@ -1,0 +1,31 @@
+[package]
+name = "mcp-attrs-macros"
+version = "0.0.1"
+edition = "2024"
+authors = ["frozenlib <frozenlib@users.noreply.github.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/frozenlib/mcp-attr"
+documentation = "https://docs.rs/mcp-attr/"
+keywords = ["mcp", "model-context-protocol"]
+categories = ["development-tools", "api-bindings", "asynchronous"]
+description = "A crate for creating Model Context Protocol servers using declarative descriptions with attributes and types"
+rust-version = "1.85.0"
+include = [
+    "/src/**",
+    "/examples/**",
+    "/tests/**",
+    "/README.md",
+    "/README.*.md",
+    "/LICENSE*",
+]
+
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.94"
+quote = "1.0.39"
+syn = { version = "2.0.99", features = ["full", "extra-traits"] }
+structmeta = "0.3.0"
+uri-template-ex = { workspace = true }

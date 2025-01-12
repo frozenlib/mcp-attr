@@ -1,0 +1,16 @@
+error[E0277]: the trait bound `mcp_attr::schema::ReadResourceResult: From<X>` is not satisfied
+  --> tests/compile_fail/resource_return_type.rs:12:26
+   |
+12 |     async fn f(&self) -> Result<X> {
+   |                          ^^^^^^ the trait `From<X>` is not implemented for `mcp_attr::schema::ReadResourceResult`
+   |
+   = help: the following other types implement trait `From<T>`:
+             `mcp_attr::schema::ReadResourceResult` implements `From<&ReadResourceResultContentsItem>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<&mcp_attr::schema::BlobResourceContents>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<&mcp_attr::schema::ReadResourceResult>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<&mcp_attr::schema::TextResourceContents>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<&str>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<Base64Bytes>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<ReadResourceResultContentsItem>`
+             `mcp_attr::schema::ReadResourceResult` implements `From<String>`
+           and $N others
