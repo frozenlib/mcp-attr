@@ -2,13 +2,14 @@ use std::{future::Future, sync::Arc};
 
 pub use jsoncall::Result;
 use jsoncall::{
-    bail_public, ErrorCode, Handler, Hook, NotificationContext, Params, RequestContextAs,
-    RequestId, Response, Session, SessionContext, SessionResult,
+    ErrorCode, Handler, Hook, NotificationContext, Params, RequestContextAs, RequestId, Response,
+    Session, SessionContext, SessionResult, bail_public,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Map;
 
 use crate::{
+    PROTOCOL_VERSION,
     common::McpCancellationHook,
     error::{prompt_not_found, tool_not_found},
     schema::{
@@ -17,13 +18,12 @@ use crate::{
         GetPromptResult, Implementation, InitializeRequestParams, InitializeResult,
         InitializedNotificationParams, ListPromptsRequestParams, ListPromptsResult,
         ListResourceTemplatesRequestParams, ListResourceTemplatesResult,
-        ListResourcesRequestParams, ListResourcesResult, ListToolsRequestParams, ListToolsResult,
-        PingRequestParams, ProgressNotificationParams, ReadResourceRequestParams,
-        ReadResourceResult, ServerCapabilities, ServerCapabilitiesPrompts,
-        ServerCapabilitiesResources, ServerCapabilitiesTools,
+        ListResourcesRequestParams, ListResourcesResult, ListRootsRequestParams, ListRootsResult,
+        ListToolsRequestParams, ListToolsResult, PingRequestParams, ProgressNotificationParams,
+        ReadResourceRequestParams, ReadResourceResult, Root, ServerCapabilities,
+        ServerCapabilitiesPrompts, ServerCapabilitiesResources, ServerCapabilitiesTools,
     },
     utils::Empty,
-    PROTOCOL_VERSION,
 };
 
 mod mcp_server_attr;
@@ -415,6 +415,13 @@ impl RequestContext {
         self.session
             .request("sampling/createMessage", Some(&p))
             .await
+    }
+    pub async fn list_roots(&self) -> SessionResult<Vec<Root>> {
+        let res: ListRootsResult = self
+            .session
+            .request("roots/list", Some(&ListRootsRequestParams::default()))
+            .await?;
+        Ok(res.roots)
     }
 }
 
