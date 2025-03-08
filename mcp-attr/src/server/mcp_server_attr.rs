@@ -187,4 +187,4 @@
 /// [`JsonSchema`]: schemars::JsonSchema
 /// [`UriTemplate`]: uri_template_ex::UriTemplate
 // #[include_doc("../mcp_server_attr.md",end)]
-pub use mcp_attrs_macros::mcp_server;
+pub use mcp_attr_macros::mcp_server;

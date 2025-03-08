@@ -3,8 +3,8 @@ use std::fs;
 use std::path::Path;
 
 // テスト対象のモジュールをインポート
-extern crate mcp_attrs_codegen;
-use mcp_attrs_codegen::transitivity::build_transitivity;
+extern crate mcp_attr_codegen;
+use mcp_attr_codegen::transitivity::build_transitivity;
 
 #[test]
 fn test_basic_transitivity() -> Result<()> {
