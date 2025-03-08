@@ -9,6 +9,7 @@ use serde_json::Map;
 use tokio::io::{AsyncBufRead, AsyncWrite};
 
 use crate::{
+    PROTOCOL_VERSION,
     common::McpCancellationHook,
     schema::{
         CallToolRequestParams, CallToolResult, CancelledNotificationParams, ClientCapabilities,
@@ -16,12 +17,11 @@ use crate::{
         GetPromptRequestParams, GetPromptResult, Implementation, InitializeRequestParams,
         InitializeResult, InitializedNotificationParams, ListPromptsRequestParams,
         ListPromptsResult, ListResourceTemplatesRequestParams, ListResourceTemplatesResult,
-        ListResourcesRequestParams, ListResourcesResult, ListToolsRequestParams, ListToolsResult,
-        PingRequestParams, ReadResourceRequestParams, ReadResourceResult, Root,
+        ListResourcesRequestParams, ListResourcesResult, ListRootsResult, ListToolsRequestParams,
+        ListToolsResult, PingRequestParams, ReadResourceRequestParams, ReadResourceResult, Root,
     },
     server::McpServer,
     utils::Empty,
-    PROTOCOL_VERSION,
 };
 
 pub struct McpclientSessionOptions {}
@@ -133,9 +133,7 @@ impl Handler for MpcClientHandler {
             }
             "ping" => return cx.handle(self.ping(params.to()?)),
             "roots/list" => {
-                if let Some(roots) = &self.roots {
-                    return cx.handle(Ok(roots.clone()));
-                }
+                return self.roots_list(cx.to());
             }
             _ => {}
         }
@@ -165,6 +163,13 @@ impl MpcClientHandler {
     ) -> Result<Response> {
         cx.session().cancel_incoming_request(&p.request_id, None);
         cx.handle(Ok(()))
+    }
+    fn roots_list(&self, cx: RequestContextAs<ListRootsResult>) -> Result<Response> {
+        if let Some(roots) = &self.roots {
+            cx.handle(Ok(roots.clone().into()))
+        } else {
+            cx.method_not_found()
+        }
     }
 }
 pub struct McpClient {

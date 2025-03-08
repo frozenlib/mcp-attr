@@ -2,6 +2,7 @@ use jsoncall::{ErrorCode, bail_public};
 use schemars::{JsonSchema, schema::Metadata, schema_for};
 use serde::Serialize;
 use serde_json::{Value, to_value};
+use url::Url;
 
 use crate::{
     Result,
@@ -9,16 +10,19 @@ use crate::{
         BlobResourceContents, CallToolRequestParams, CallToolResult, CallToolResultContentItem,
         EmbeddedResource, EmbeddedResourceResource, GetPromptRequestParams, GetPromptResult,
         ImageContent, Implementation, ListPromptsResult, ListResourceTemplatesResult,
-        ListResourcesResult, ListToolsResult, Prompt, PromptArgument, PromptMessage,
-        PromptMessageContent, ReadResourceRequestParams, ReadResourceResult,
+        ListResourcesResult, ListRootsResult, ListToolsResult, Prompt, PromptArgument,
+        PromptMessage, PromptMessageContent, ReadResourceRequestParams, ReadResourceResult,
         ReadResourceResultContentsItem, Resource, ResourceAnnotations, ResourceTemplate,
-        ResourceTemplateAnnotations, Role, TextContent, TextResourceContents, Tool,
+        ResourceTemplateAnnotations, Role, Root, TextContent, TextResourceContents, Tool,
         ToolInputSchema,
     },
     utils::Base64Bytes,
 };
-use std::collections::BTreeMap;
-use std::fmt::Display;
+use std::{
+    collections::BTreeMap,
+    path::{Path, PathBuf},
+};
+use std::{fmt::Display, str::FromStr};
 
 impl From<Vec<Prompt>> for ListPromptsResult {
     fn from(prompts: Vec<Prompt>) -> Self {
@@ -387,5 +391,34 @@ impl Implementation {
 impl From<serde_json::Value> for TextContent {
     fn from(value: serde_json::Value) -> Self {
         TextContent::new(format!("{value:#}"))
+    }
+}
+
+impl Root {
+    pub fn new(uri: &str) -> Self {
+        Self {
+            uri: uri.to_string(),
+            name: None,
+        }
+    }
+    pub fn with_name(mut self, name: impl Display) -> Self {
+        self.name = Some(name.to_string());
+        self
+    }
+
+    pub fn from_file_path(path: impl AsRef<Path>) -> Option<Self> {
+        Some(Self::new(Url::from_file_path(path).ok()?.as_str()))
+    }
+    pub fn to_file_path(&self) -> Option<PathBuf> {
+        Url::from_str(&self.uri).ok()?.to_file_path().ok()
+    }
+}
+
+impl From<Vec<Root>> for ListRootsResult {
+    fn from(roots: Vec<Root>) -> Self {
+        ListRootsResult {
+            roots,
+            meta: Default::default(),
+        }
     }
 }
