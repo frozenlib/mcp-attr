@@ -337,7 +337,7 @@ async fn func_name(&self) -> Result<ReadResourceResult> { }
 
 - [`FromStr`] : 文字列から値を復元する為のトレイト
 
-URI Template は [RFC 6570] Level2 で指定。URI Template では下記の変数が使用できる。
+URI Template は [RFC 6570] Level2 で指定。下記の 3 種類の変数が使用できる。
 
 - `{var}`
 - `{+var}`
