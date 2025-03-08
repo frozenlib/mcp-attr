@@ -584,7 +584,7 @@ dependencies = [
  "derive-ex",
  "futures",
  "jsoncall",
- "mcp-attrs-macros",
+ "mcp-attr-macros",
  "ordered-float",
  "pretty_assertions",
  "schemars",
@@ -600,7 +600,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mcp-attrs-codegen"
+name = "mcp-attr-codegen"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -614,7 +614,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mcp-attrs-macros"
+name = "mcp-attr-macros"
 version = "0.0.1"
 dependencies = [
  "proc-macro2",

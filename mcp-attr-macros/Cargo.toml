@@ -1,5 +1,5 @@
 [package]
-name = "mcp-attrs-macros"
+name = "mcp-attr-macros"
 version = "0.0.1"
 edition = "2024"
 authors = ["frozenlib <frozenlib@users.noreply.github.com>"]

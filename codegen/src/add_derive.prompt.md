@@ -2,7 +2,7 @@
 
 `tests` モジュール(ファイルは `codegen2/src/add_derive/tests.rs` )にテストを作成し、テストをパスするまでコードを修正してください。
 
-テストは `cargo test -p mcp-attrs-codegen2 --lib -- add_derive` で実行します。
+テストは `cargo test -p mcp-attr-codegen2 --lib -- add_derive` で実行します。
 
 ```rust
 use syn::Ident;

@@ -37,7 +37,7 @@ ordered-float = "5.0.0"
 slabmap = "0.2.1"
 schemars = { workspace = true }
 jsoncall = "0.0.1"
-mcp-attrs-macros = { version = "=0.0.1", path = "../mcp-attr-macros" }
+mcp-attr-macros = { version = "=0.0.1", path = "../mcp-attr-macros" }
 uri-template-ex = { workspace = true }
 
 [dev-dependencies]

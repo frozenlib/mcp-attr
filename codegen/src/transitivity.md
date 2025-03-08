@@ -85,5 +85,5 @@ struct Convert {
 
 どのようなテストが必要かを考え、テストを実行し、テストがパスするまで修正してください
 
-- `cargo test -p mcp-attrs-codegen2` でテストを実行する
+- `cargo test -p mcp-attr-codegen2` でテストを実行する
 - `impl From<&Self> for X` のような Self キーワードを含む場合のテストも行う

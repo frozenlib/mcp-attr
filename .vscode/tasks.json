@@ -258,7 +258,7 @@
     {
       "type": "shell",
       "label": "generate code",
-      "command": "cargo run -p mcp-attrs-codegen",
+      "command": "cargo run -p mcp-attr-codegen",
       "args": [],
       "problemMatcher": [
         "$rustc"
@@ -267,7 +267,7 @@
     {
       "type": "shell",
       "label": "watch codegen",
-      "command": "watchexec --restart -c -w codegen cargo run -p mcp-attrs-codegen",
+      "command": "watchexec --restart -c -w codegen cargo run -p mcp-attr-codegen",
       "args": [],
       "problemMatcher": [
         "$rustc"
