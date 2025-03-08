@@ -6,7 +6,7 @@ authors = ["frozenlib <frozenlib@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/frozenlib/mcp-attr"
 documentation = "https://docs.rs/mcp-attr/"
-keywords = ["mcp", "model-context-protocol"]
+keywords = ["mcp", "model-context-protocol", "AI"]
 categories = ["development-tools", "api-bindings", "asynchronous"]
 description = "A crate for creating Model Context Protocol servers using declarative descriptions with attributes and types"
 rust-version = "1.85.0"
@@ -27,12 +27,17 @@ base64 = "0.22.1"
 futures = "0.3.31"
 url = "2.5.4"
 derive-ex = "0.1.8"
-tokio = { version = "1.44.0", "features" = ["sync", "rt"] }
+tokio = { version = "1.44.0", "features" = [
+    "sync",
+    "rt",
+    "rt-multi-thread",
+    "macros",
+] }
 ordered-float = "5.0.0"
 slabmap = "0.2.1"
 schemars = { workspace = true }
 jsoncall = "0.0.1"
-mcp-attrs-macros = { path = "../mcp-attr-macros" }
+mcp-attrs-macros = { version = "=0.0.1", path = "../mcp-attr-macros" }
 uri-template-ex = { workspace = true }
 
 [dev-dependencies]
