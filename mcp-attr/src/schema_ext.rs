@@ -8,13 +8,14 @@ use crate::{
     Result,
     schema::{
         BlobResourceContents, CallToolRequestParams, CallToolResult, CallToolResultContentItem,
-        EmbeddedResource, EmbeddedResourceResource, GetPromptRequestParams, GetPromptResult,
-        ImageContent, Implementation, ListPromptsResult, ListResourceTemplatesResult,
-        ListResourcesResult, ListRootsResult, ListToolsResult, Prompt, PromptArgument,
-        PromptMessage, PromptMessageContent, ReadResourceRequestParams, ReadResourceResult,
-        ReadResourceResultContentsItem, Resource, ResourceAnnotations, ResourceTemplate,
-        ResourceTemplateAnnotations, Role, Root, TextContent, TextResourceContents, Tool,
-        ToolInputSchema,
+        CompleteRequestParams, CompleteRequestParamsArgument, CompleteRequestParamsRef,
+        CompleteResult, CompleteResultCompletion, EmbeddedResource, EmbeddedResourceResource,
+        GetPromptRequestParams, GetPromptResult, ImageContent, Implementation, ListPromptsResult,
+        ListResourceTemplatesResult, ListResourcesResult, ListRootsResult, ListToolsResult, Prompt,
+        PromptArgument, PromptMessage, PromptMessageContent, PromptReference,
+        ReadResourceRequestParams, ReadResourceResult, ReadResourceResultContentsItem, Resource,
+        ResourceAnnotations, ResourceReference, ResourceTemplate, ResourceTemplateAnnotations,
+        Role, Root, TextContent, TextResourceContents, Tool, ToolInputSchema,
     },
     utils::Base64Bytes,
 };
@@ -419,6 +420,83 @@ impl From<Vec<Root>> for ListRootsResult {
         ListRootsResult {
             roots,
             meta: Default::default(),
+        }
+    }
+}
+
+impl From<CompleteResultCompletion> for CompleteResult {
+    fn from(completion: CompleteResultCompletion) -> Self {
+        Self {
+            completion,
+            meta: Default::default(),
+        }
+    }
+}
+impl CompleteResultCompletion {
+    pub const MAX_VALUES: usize = 100;
+}
+
+impl From<Vec<String>> for CompleteResultCompletion {
+    fn from(mut values: Vec<String>) -> Self {
+        let total = Some(values.len() as i64);
+        let has_more = if values.len() > Self::MAX_VALUES {
+            values.truncate(Self::MAX_VALUES);
+            Some(true)
+        } else {
+            None
+        };
+        Self {
+            has_more,
+            total,
+            values,
+        }
+    }
+}
+impl From<&[&str]> for CompleteResultCompletion {
+    fn from(values: &[&str]) -> Self {
+        values
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>()
+            .into()
+    }
+}
+
+impl CompleteRequestParams {
+    pub fn new(r: CompleteRequestParamsRef, argument: CompleteRequestParamsArgument) -> Self {
+        Self { argument, ref_: r }
+    }
+}
+impl CompleteRequestParamsArgument {
+    pub fn new(name: &str, value: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            value: value.to_string(),
+        }
+    }
+}
+
+impl CompleteRequestParamsRef {
+    pub fn new_prompt(name: &str) -> Self {
+        CompleteRequestParamsRef::PromptReference(PromptReference::new(name))
+    }
+    pub fn new_resource(uri: &str) -> Self {
+        CompleteRequestParamsRef::ResourceReference(ResourceReference::new(uri))
+    }
+}
+impl PromptReference {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            type_: "ref/prompt".to_string(),
+        }
+    }
+}
+impl ResourceReference {
+    pub fn new(uri: &str) -> Self {
+        Self {
+            uri: uri.to_string(),
+            type_: "ref/resource".to_string(),
         }
     }
 }

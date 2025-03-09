@@ -13,12 +13,13 @@ use crate::{
     common::McpCancellationHook,
     schema::{
         CallToolRequestParams, CallToolResult, CancelledNotificationParams, ClientCapabilities,
-        ClientCapabilitiesRoots, CreateMessageRequestParams, CreateMessageResult,
-        GetPromptRequestParams, GetPromptResult, Implementation, InitializeRequestParams,
-        InitializeResult, InitializedNotificationParams, ListPromptsRequestParams,
-        ListPromptsResult, ListResourceTemplatesRequestParams, ListResourceTemplatesResult,
-        ListResourcesRequestParams, ListResourcesResult, ListRootsResult, ListToolsRequestParams,
-        ListToolsResult, PingRequestParams, ReadResourceRequestParams, ReadResourceResult, Root,
+        ClientCapabilitiesRoots, CompleteRequestParams, CompleteResult, CreateMessageRequestParams,
+        CreateMessageResult, GetPromptRequestParams, GetPromptResult, Implementation,
+        InitializeRequestParams, InitializeResult, InitializedNotificationParams,
+        ListPromptsRequestParams, ListPromptsResult, ListResourceTemplatesRequestParams,
+        ListResourceTemplatesResult, ListResourcesRequestParams, ListResourcesResult,
+        ListRootsResult, ListToolsRequestParams, ListToolsResult, PingRequestParams,
+        ReadResourceRequestParams, ReadResourceResult, Root,
     },
     server::McpServer,
     utils::Empty,
@@ -253,6 +254,14 @@ impl McpClient {
         self.session.request("tools/call", Some(&params)).await
     }
 
+    pub async fn completion_complete(
+        &self,
+        params: CompleteRequestParams,
+    ) -> SessionResult<CompleteResult> {
+        self.session
+            .request("completion/complete", Some(&params))
+            .await
+    }
     pub async fn ping(&self) -> SessionResult<()> {
         let _: Empty = self
             .session

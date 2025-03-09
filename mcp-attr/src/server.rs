@@ -66,6 +66,9 @@ impl Handler for McpServerHandler {
             "resources/read" => self.call(params, cx, |s, p, cx| s.dyn_resources_read(p, cx, i)),
             "tools/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_tools_list(p, cx, i)),
             "tools/call" => self.call(params, cx, |s, p, cx| s.dyn_tools_call(p, cx, i)),
+            "completion/complete" => {
+                self.call(params, cx, |s, p, cx| s.dyn_completion_complete(p, cx, i))
+            }
             _ => cx.method_not_found(),
         }
     }
@@ -218,6 +221,13 @@ trait DynMcpServer: Send + Sync + 'static {
         cx: RequestContextAs<CallToolResult>,
         initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
+
+    fn dyn_completion_complete(
+        self: Arc<Self>,
+        p: CompleteRequestParams,
+        cx: RequestContextAs<CompleteResult>,
+        initialize: Arc<InitializeRequestParams>,
+    ) -> Result<Response>;
 }
 impl<T: McpServer> DynMcpServer for T {
     fn initialize_result(&self) -> InitializeResult {
@@ -297,6 +307,16 @@ impl<T: McpServer> DynMcpServer for T {
     ) -> Result<Response> {
         let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.tools_call(p, &mut mpc_cx).await })
+    }
+
+    fn dyn_completion_complete(
+        self: Arc<Self>,
+        p: CompleteRequestParams,
+        cx: RequestContextAs<CompleteResult>,
+        initialize: Arc<InitializeRequestParams>,
+    ) -> Result<Response> {
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
+        cx.handle_async(async move { self.completion_complete(p, &mut mpc_cx).await })
     }
 }
 
