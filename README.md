@@ -287,7 +287,7 @@ Function arguments become prompt arguments. Arguments must implement the followi
 Arguments can be given names using the `#[arg("name")]` attribute.
 If not specified, the name used is the function argument name with leading `_` removed.
 
-Return value: [`Result<impl Into<GetPromptResult>>`](GetPromptResult)
+Return value: [`Result<impl Into<GetPromptResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -343,7 +343,7 @@ URI Templates are specified in [RFC 6570] Level2. The following variables can be
 - `{+var}`
 - `{#var}`
 
-Return value: [`Result<impl Into<ReadResourceResult>>`](ReadResourceResult)
+Return value: [`Result<impl Into<ReadResourceResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -397,7 +397,7 @@ Function arguments become tool arguments. Arguments must implement all of the fo
 Arguments can be given names using the `#[arg("name")]` attribute.
 If not specified, the name used is the function argument name with leading `_` removed.
 
-Return value: [`Result<impl Into<CallToolResult>>`](CallToolResult)
+Return value: [`Result<impl Into<CallToolResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -512,3 +512,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`server_info`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.server_info
 [`instructions`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.instructions
 [`completion_complete`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.completion_complete
+[`Result<impl Into<GetPromptResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.GetPromptResult.html
+[`Result<impl Into<ReadResourceResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.ReadResourceResult.html
+[`Result<impl Into<CallToolResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.CallToolResult.html

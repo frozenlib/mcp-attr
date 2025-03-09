@@ -287,7 +287,7 @@ async fn func_name(&self) -> Result<GetPromptResult> { }
 引数には `#[arg("name")]` 属性を付与することで名前を指定できる。
 指定しない場合は関数引数名の最初から `_` が取り除かれた名前が使用される。
 
-戻り値: [`Result<impl Into<GetPromptResult>>`](GetPromptResult)
+戻り値: [`Result<impl Into<GetPromptResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -343,7 +343,7 @@ URI Template は [RFC 6570] Level2 で指定。下記の 3 種類の変数が使
 - `{+var}`
 - `{#var}`
 
-戻り値: [`Result<impl Into<ReadResourceResult>>`](ReadResourceResult)
+戻り値: [`Result<impl Into<ReadResourceResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -397,7 +397,7 @@ async fn func_name(&self) -> Result<CallToolResult> { }
 引数には `#[arg("name")]` 属性を付与することで名前を指定できる。
 指定しない場合は関数引数名の最初から `_` が取り除かれた名前が使用される。
 
-戻り値: [`Result<impl Into<CallToolResult>>`](CallToolResult)
+戻り値: [`Result<impl Into<CallToolResult>>`]
 
 ```rust
 use mcp_attr::server::Result;
@@ -512,3 +512,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`server_info`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.server_info
 [`instructions`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.instructions
 [`completion_complete`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.completion_complete
+[`Result<impl Into<GetPromptResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.GetPromptResult.html
+[`Result<impl Into<ReadResourceResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.ReadResourceResult.html
+[`Result<impl Into<CallToolResult>>`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.CallToolResult.html
