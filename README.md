@@ -8,7 +8,7 @@ A crate for creating Model Context Protocol servers using declarative descriptio
 
 ## Features
 
-mcp-attr is a crate designed to make it easy for both humans and AI to create Model Context Protocol servers.
+mcp-attr is a crate designed to make it easy for both humans and AI to create [Model Context Protocol] servers.
 To achieve this goal, it has the following features:
 
 - **Declarative Description**:
@@ -27,7 +27,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-mcp-attr = "0.0.1"
+mcp-attr = "0.0.2"
 tokio = "1.43.0"
 ```
 
@@ -90,7 +90,7 @@ SSE is not yet supported. However, transport is extensible, so custom transports
 
 #### Methods
 
-| Attribute                  | [`MpcServer`] methods                                                    | Model context protocol methods                                           |
+| Attribute                  | [`McpServer`] methods                                                    | Model context protocol methods                                           |
 | -------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | [`#[prompt]`](#prompt)     | [`prompts_list`]<br>[`prompts_get`]                                      | [`prompts/list`]<br>[`prompts/get`]                                      |
 | [`#[resource]`](#resource) | [`resources_list`]<br>[`resources_read`]<br>[`resources_templates_list`] | [`resources/list`]<br>[`resources/read`]<br>[`resources/templates/list`] |
@@ -194,7 +194,7 @@ impl McpServer for ExampleServer {
 
 ### State Management
 
-Since values implementing `MpcServer` are shared among multiple concurrently executing methods, only `&self` is available. `&mut self` cannot be used.
+Since values implementing `McpServer` are shared among multiple concurrently executing methods, only `&self` is available. `&mut self` cannot be used.
 
 To maintain state, you need to use thread-safe types with interior mutability like `Mutex`.
 
@@ -223,9 +223,9 @@ impl McpServer for ExampleServer {
 
 mcp_attr uses `Result`, Rust's standard error handling method.
 
-The types `mcp_attr::Error` and `mcp_attr::Result` (an alias for `std::result::Result<T, mcp_attr::Error>`) are provided for error handling.
+The types [`mcp_attr::Error`] and [`mcp_attr::Result`] (an alias for `std::result::Result<T, mcp_attr::Error>`) are provided for error handling.
 
-`mcp_attr::Error` is similar to `anyhow::Error`, capable of storing any error type implementing `std::error::Error + Sync + Send + 'static`, and implements conversion from other error types.
+`mcp_attr::Error` is similar to [`anyhow::Error`], capable of storing any error type implementing [`std::error::Error + Sync + Send + 'static`], and implements conversion from other error types.
 Therefore, in functions returning `mcp_attr::Result`, you can use the `?` operator for error handling with expressions of type `Result<T, impl std::error::Error + Sync + Send + 'static>`.
 
 However, it differs from `anyhow::Error` in the following ways:
@@ -234,10 +234,10 @@ However, it differs from `anyhow::Error` in the following ways:
 - Has functionality to distinguish whether error messages are public information to be sent to the MCP Client or private information not to be sent
   - (However, in debug builds, all information is sent to the MCP Client)
 
-The macros `bail!` and `bail_public!` are provided for error handling, similar to `anyhow::bail!`.
+The macros [`bail!`] and [`bail_public!`] are provided for error handling, similar to [`anyhow::bail!`].
 
-- `bail!` takes a format string and arguments and raises an error treated as private information.
-- `bail_public!` takes an error code, format string, and arguments and raises an error treated as public information.
+- [`bail!`] takes a format string and arguments and raises an error treated as private information.
+- [`bail_public!`] takes an error code, format string, and arguments and raises an error treated as public information.
 
 Additionally, conversions from other error types are treated as private information.
 
@@ -427,20 +427,20 @@ You can also directly implement `McpServer` methods without using attributes.
 
 Additionally, the following methods do not support implementation through attributes and must be implemented manually:
 
-- `server_info`
-- `instructions`
-- `completion_complete`
+- [`server_info`]
+- [`instructions`]
+- [`completion_complete`]
 
-The following method can have its attribute-based implementation overridden with manual implementation:
+The following method can be overridden with manual implementation over the attribute-based implementation:
 
-- `tools_list`
+- [`tools_list`]
 
 ### Testing
 
 With the advent of AI Coding Agents, testing has become even more important.
-AI can hardly write correct code without tests, but with tests, it can write correct code through repeated testing and correction.
+AI can hardly write correct code without tests, but with tests, it can write correct code through repeated testing and fixes.
 
-mcp-attr includes a test MCP Client that connects to MCP servers within the process.
+mcp_attr includes [`McpClient`] for testing, which connects to MCP servers within the process.
 
 ```rust
 use mcp_attr::client::McpClient;
@@ -478,14 +478,8 @@ This project is dual licensed under Apache-2.0/MIT. See the two LICENSE-\* files
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
+[Model Context Protocol]: https://spec.modelcontextprotocol.io/specification/2024-11-05/
 [RFC 6570]: https://www.rfc-editor.org/rfc/rfc6570.html
-[`prompts_list`]: McpServer::prompts_list
-[`prompts_get`]: McpServer::prompts_get
-[`resources_list`]: McpServer::resources_list
-[`resources_read`]: McpServer::resources_read
-[`resources_templates_list`]: McpServer::resources_templates_list
-[`tools_list`]: McpServer::tools_list
-[`tools_call`]: McpServer::tools_call
 [`prompts/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#listing-prompts
 [`prompts/get`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#getting-a-prompt
 [`resources/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/#listing-resources
@@ -496,3 +490,25 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`FromStr`]: https://doc.rust-lang.org/std/str/trait.FromStr.html
 [`JsonSchema`]: https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html
 [`DeserializeOwned`]: https://docs.rs/serde/latest/serde/de/trait.DeserializeOwned.html
+[`McpServer`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html
+[`McpClient`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html
+[`prompts_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_list
+[`prompts_get`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_get
+[`resources_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_list
+[`resources_read`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_read
+[`resources_templates_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_templates_list
+[`tools_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_list
+[`tools_call`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_call
+[`GetPromptResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.GetPromptResult.html
+[`ReadResourceResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.ReadResourceResult.html
+[`CallToolResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.CallToolResult.html
+[`mcp_attr::Error`]: https://docs.rs/mcp-attr/latest/mcp_attr/struct.Error.html
+[`mcp_attr::Result`]: https://docs.rs/mcp-attr/latest/mcp_attr/type.Result.html
+[`anyhow::Error`]: https://docs.rs/anyhow/latest/anyhow/struct.Error.html
+[`std::error::Error + Sync + Send + 'static`]: https://doc.rust-lang.org/std/error/trait.Error.html
+[`anyhow::bail!`]: https://docs.rs/anyhow/latest/anyhow/macro.bail.html
+[`bail!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail.html
+[`bail_public!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail_public.html
+[`server_info`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.server_info
+[`instructions`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.instructions
+[`completion_complete`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.completion_complete

@@ -9,7 +9,7 @@
 //!
 //! ## 特徴
 //!
-//! mcp-attr は人間と AI によって簡単に Model Context Protocol サーバを作れるようにする事を目的とした crate です。
+//! mcp-attr は人間と AI によって簡単に [Model Context Protocol] サーバを作れるようにする事を目的とした crate です。
 //! この目的を達成する為、次のような特徴を持っています。
 //!
 //! - **宣言的な記述**:
@@ -28,7 +28,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! mcp-attr = "0.0.1"
+//! mcp-attr = "0.0.2"
 //! tokio = "1.43.0"
 //! ```
 //!
@@ -91,7 +91,7 @@
 //!
 //! #### メソッド
 //!
-//! | Attribute                  | [`MpcServer`] methods                                                    | Model context protocol methods                                           |
+//! | Attribute                  | [`McpServer`] methods                                                    | Model context protocol methods                                           |
 //! | -------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 //! | [`#[prompt]`](#prompt)     | [`prompts_list`]<br>[`prompts_get`]                                      | [`prompts/list`]<br>[`prompts/get`]                                      |
 //! | [`#[resource]`](#resource) | [`resources_list`]<br>[`resources_read`]<br>[`resources_templates_list`] | [`resources/list`]<br>[`resources/read`]<br>[`resources/templates/list`] |
@@ -101,7 +101,7 @@
 //!
 //! ### サーバの開始
 //!
-//! この crate による MPC サーバは非同期ランタイム tokio 上で動作します。
+//! この crate による Mcp サーバは非同期ランタイム tokio 上で動作します。
 //!
 //! `#[tokio::main]` で非同期ランタイムを起動し `serve_stdio` 関数に `McpServer` トレイトを実装した値を渡すことで
 //! 標準入出力をトランスポートとするサーバが起動します。
@@ -195,7 +195,7 @@
 //!
 //! ### 状態の管理
 //!
-//! `MpcServer` を実装する値は同時に実行される複数のメソッドで共有されるため `&self` のみ使用可能です。 `&mut self` は使用できません。
+//! `McpServer` を実装する値は同時に実行される複数のメソッドで共有されるため `&self` のみ使用可能です。 `&mut self` は使用できません。
 //!
 //! 状態を持つには `Mutex` などの内部可変性を持つスレッドセーフな型を使用する必要があります。
 //!
@@ -224,9 +224,9 @@
 //!
 //! mcp_attr では Rust の標準的なエラー処理方法である `Result` を使用します。
 //!
-//! エラー処理用の型として `mcp_attr::Error` と `mcp_attr::Result` (`std::result::Result<T, mcp_attr::Error>`の別名) が用意されています。
+//! エラー処理用の型として [`mcp_attr::Error`] と [`mcp_attr::Result`] (`std::result::Result<T, mcp_attr::Error>` の別名) が用意されています。
 //!
-//! `mcp_attr::Error` は `anyhow::Error` と似た、`std::error::Error + Sync + Send + 'static` を実装する任意のエラー型を格納できる型で、他のエラー型からの変換が実装されています。
+//! `mcp_attr::Error` は [`anyhow::Error`] と似た、[`std::error::Error + Sync + Send + 'static`] を実装する任意のエラー型を格納できる型で、他のエラー型からの変換が実装されています。
 //! そのため `mcp_attr::Result` を返す関数では、型が `Result<T, impl std::error::Error + Sync + Send + 'static>` となる式に `?` 演算子を使用してエラー処理を行う事ができます。
 //!
 //! ただし、`anyhow::Error` とは下記の点が異なります。
@@ -235,10 +235,10 @@
 //! - エラーメッセージが MCP Client に送信する公開情報であるか、送信しないプライベート情報であるかを区別する機能を持つ
 //!   - (ただし、デバッグビルドでは全ての情報が MCP Client に送信される)
 //!
-//! `anyhow::bail!` のようなエラー処理用のマクロとして `bail!` と `bail_public!` が用意されています。
+//! [`anyhow::bail!`] のようなエラー処理用のマクロとして [`bail!`] と [`bail_public!`] が用意されています。
 //!
-//! - `bail!` はフォーマット文字列と引数を取り、非公開情報として扱われるエラーを発生させます。
-//! - `bail_public!` はエラーコードとフォーマット文字列、引数を取り、公開情報として扱われるエラーを発生させます。
+//! - [`bail!`] はフォーマット文字列と引数を取り、非公開情報として扱われるエラーを発生させます。
+//! - [`bail_public!`] はエラーコードとフォーマット文字列、引数を取り、公開情報として扱われるエラーを発生させます。
 //!
 //! また、他のエラー型からの変換は非公開情報として扱われます。
 //!
@@ -428,20 +428,20 @@
 //!
 //! また、下記のメソッドは属性による実装に対応しておらず、手動での実装のみが可能です。
 //!
-//! - `server_info`
-//! - `instructions`
-//! - `completion_complete`
+//! - [`server_info`]
+//! - [`instructions`]
+//! - [`completion_complete`]
 //!
 //! 次のメソッドは、属性による実装を手動での実装で上書きすることができます。
 //!
-//! - `tools_list`
+//! - [`tools_list`]
 //!
 //! ### テスト方法
 //!
 //! AI Coding Agent の登場によりテストはより重要になりました。
 //! AI はテスト無しでは、正しいコードをほとんど書く事ができませんが、テストがあればテストと修正を繰り返すことで正しいコードを書くことができるでしょう。
 //!
-//! mcp_attr には、プロセス内で MCP サーバと接続するテスト用の MCP Client が含まれています。
+//! mcp_attr には、プロセス内で MCP サーバと接続するテスト用の [`McpClient`] が含まれています。
 //!
 //! ```rust
 //! use mcp_attr::client::McpClient;
@@ -479,14 +479,8 @@
 //!
 //! Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 //!
+//! [Model Context Protocol]: https://spec.modelcontextprotocol.io/specification/2024-11-05/
 //! [RFC 6570]: https://www.rfc-editor.org/rfc/rfc6570.html
-//! [`prompts_list`]: McpServer::prompts_list
-//! [`prompts_get`]: McpServer::prompts_get
-//! [`resources_list`]: McpServer::resources_list
-//! [`resources_read`]: McpServer::resources_read
-//! [`resources_templates_list`]: McpServer::resources_templates_list
-//! [`tools_list`]: McpServer::tools_list
-//! [`tools_call`]: McpServer::tools_call
 //! [`prompts/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#listing-prompts
 //! [`prompts/get`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#getting-a-prompt
 //! [`resources/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/#listing-resources
@@ -497,6 +491,28 @@
 //! [`FromStr`]: https://doc.rust-lang.org/std/str/trait.FromStr.html
 //! [`JsonSchema`]: https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html
 //! [`DeserializeOwned`]: https://docs.rs/serde/latest/serde/de/trait.DeserializeOwned.html
+//! [`McpServer`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html
+//! [`McpClient`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html
+//! [`prompts_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_list
+//! [`prompts_get`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_get
+//! [`resources_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_list
+//! [`resources_read`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_read
+//! [`resources_templates_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_templates_list
+//! [`tools_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_list
+//! [`tools_call`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_call
+//! [`GetPromptResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.GetPromptResult.html
+//! [`ReadResourceResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.ReadResourceResult.html
+//! [`CallToolResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.CallToolResult.html
+//! [`mcp_attr::Error`]: https://docs.rs/mcp-attr/latest/mcp_attr/struct.Error.html
+//! [`mcp_attr::Result`]: https://docs.rs/mcp-attr/latest/mcp_attr/type.Result.html
+//! [`anyhow::Error`]: https://docs.rs/anyhow/latest/anyhow/struct.Error.html
+//! [`std::error::Error + Sync + Send + 'static`]: https://doc.rust-lang.org/std/error/trait.Error.html
+//! [`anyhow::bail!`]: https://docs.rs/anyhow/latest/anyhow/macro.bail.html
+//! [`bail!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail.html
+//! [`bail_public!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail_public.html
+//! [`server_info`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.server_info
+//! [`instructions`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.instructions
+//! [`completion_complete`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.completion_complete
 // #![include_doc("../../README.ja.md", end)]
 // #![include_doc("../../README.md", start)]
 //! # mcp-attr
@@ -509,7 +525,7 @@
 //!
 //! ## Features
 //!
-//! mcp-attr is a crate designed to make it easy for both humans and AI to create Model Context Protocol servers.
+//! mcp-attr is a crate designed to make it easy for both humans and AI to create [Model Context Protocol] servers.
 //! To achieve this goal, it has the following features:
 //!
 //! - **Declarative Description**:
@@ -528,7 +544,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! mcp-attr = "0.0.1"
+//! mcp-attr = "0.0.2"
 //! tokio = "1.43.0"
 //! ```
 //!
@@ -591,7 +607,7 @@
 //!
 //! #### Methods
 //!
-//! | Attribute                  | [`MpcServer`] methods                                                    | Model context protocol methods                                           |
+//! | Attribute                  | [`McpServer`] methods                                                    | Model context protocol methods                                           |
 //! | -------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 //! | [`#[prompt]`](#prompt)     | [`prompts_list`]<br>[`prompts_get`]                                      | [`prompts/list`]<br>[`prompts/get`]                                      |
 //! | [`#[resource]`](#resource) | [`resources_list`]<br>[`resources_read`]<br>[`resources_templates_list`] | [`resources/list`]<br>[`resources/read`]<br>[`resources/templates/list`] |
@@ -695,7 +711,7 @@
 //!
 //! ### State Management
 //!
-//! Since values implementing `MpcServer` are shared among multiple concurrently executing methods, only `&self` is available. `&mut self` cannot be used.
+//! Since values implementing `McpServer` are shared among multiple concurrently executing methods, only `&self` is available. `&mut self` cannot be used.
 //!
 //! To maintain state, you need to use thread-safe types with interior mutability like `Mutex`.
 //!
@@ -724,9 +740,9 @@
 //!
 //! mcp_attr uses `Result`, Rust's standard error handling method.
 //!
-//! The types `mcp_attr::Error` and `mcp_attr::Result` (an alias for `std::result::Result<T, mcp_attr::Error>`) are provided for error handling.
+//! The types [`mcp_attr::Error`] and [`mcp_attr::Result`] (an alias for `std::result::Result<T, mcp_attr::Error>`) are provided for error handling.
 //!
-//! `mcp_attr::Error` is similar to `anyhow::Error`, capable of storing any error type implementing `std::error::Error + Sync + Send + 'static`, and implements conversion from other error types.
+//! `mcp_attr::Error` is similar to [`anyhow::Error`], capable of storing any error type implementing [`std::error::Error + Sync + Send + 'static`], and implements conversion from other error types.
 //! Therefore, in functions returning `mcp_attr::Result`, you can use the `?` operator for error handling with expressions of type `Result<T, impl std::error::Error + Sync + Send + 'static>`.
 //!
 //! However, it differs from `anyhow::Error` in the following ways:
@@ -735,10 +751,10 @@
 //! - Has functionality to distinguish whether error messages are public information to be sent to the MCP Client or private information not to be sent
 //!   - (However, in debug builds, all information is sent to the MCP Client)
 //!
-//! The macros `bail!` and `bail_public!` are provided for error handling, similar to `anyhow::bail!`.
+//! The macros [`bail!`] and [`bail_public!`] are provided for error handling, similar to [`anyhow::bail!`].
 //!
-//! - `bail!` takes a format string and arguments and raises an error treated as private information.
-//! - `bail_public!` takes an error code, format string, and arguments and raises an error treated as public information.
+//! - [`bail!`] takes a format string and arguments and raises an error treated as private information.
+//! - [`bail_public!`] takes an error code, format string, and arguments and raises an error treated as public information.
 //!
 //! Additionally, conversions from other error types are treated as private information.
 //!
@@ -928,20 +944,20 @@
 //!
 //! Additionally, the following methods do not support implementation through attributes and must be implemented manually:
 //!
-//! - `server_info`
-//! - `instructions`
-//! - `completion_complete`
+//! - [`server_info`]
+//! - [`instructions`]
+//! - [`completion_complete`]
 //!
-//! The following method can have its attribute-based implementation overridden with manual implementation:
+//! The following method can be overridden with manual implementation over the attribute-based implementation:
 //!
-//! - `tools_list`
+//! - [`tools_list`]
 //!
 //! ### Testing
 //!
 //! With the advent of AI Coding Agents, testing has become even more important.
-//! AI can hardly write correct code without tests, but with tests, it can write correct code through repeated testing and correction.
+//! AI can hardly write correct code without tests, but with tests, it can write correct code through repeated testing and fixes.
 //!
-//! mcp-attr includes a test MCP Client that connects to MCP servers within the process.
+//! mcp_attr includes [`McpClient`] for testing, which connects to MCP servers within the process.
 //!
 //! ```rust
 //! use mcp_attr::client::McpClient;
@@ -979,14 +995,8 @@
 //!
 //! Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 //!
+//! [Model Context Protocol]: https://spec.modelcontextprotocol.io/specification/2024-11-05/
 //! [RFC 6570]: https://www.rfc-editor.org/rfc/rfc6570.html
-//! [`prompts_list`]: McpServer::prompts_list
-//! [`prompts_get`]: McpServer::prompts_get
-//! [`resources_list`]: McpServer::resources_list
-//! [`resources_read`]: McpServer::resources_read
-//! [`resources_templates_list`]: McpServer::resources_templates_list
-//! [`tools_list`]: McpServer::tools_list
-//! [`tools_call`]: McpServer::tools_call
 //! [`prompts/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#listing-prompts
 //! [`prompts/get`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/#getting-a-prompt
 //! [`resources/list`]: https://spec.modelcontextprotocol.io/specification/2024-11-05/server/resources/#listing-resources
@@ -997,4 +1007,26 @@
 //! [`FromStr`]: https://doc.rust-lang.org/std/str/trait.FromStr.html
 //! [`JsonSchema`]: https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html
 //! [`DeserializeOwned`]: https://docs.rs/serde/latest/serde/de/trait.DeserializeOwned.html
+//! [`McpServer`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html
+//! [`McpClient`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html
+//! [`prompts_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_list
+//! [`prompts_get`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.prompts_get
+//! [`resources_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_list
+//! [`resources_read`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_read
+//! [`resources_templates_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.resources_templates_list
+//! [`tools_list`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_list
+//! [`tools_call`]: https://docs.rs/mcp-attr/latest/mcp_attr/client/struct.McpClient.html#method.tools_call
+//! [`GetPromptResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.GetPromptResult.html
+//! [`ReadResourceResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.ReadResourceResult.html
+//! [`CallToolResult`]: https://docs.rs/mcp-attr/latest/mcp_attr/schema/struct.CallToolResult.html
+//! [`mcp_attr::Error`]: https://docs.rs/mcp-attr/latest/mcp_attr/struct.Error.html
+//! [`mcp_attr::Result`]: https://docs.rs/mcp-attr/latest/mcp_attr/type.Result.html
+//! [`anyhow::Error`]: https://docs.rs/anyhow/latest/anyhow/struct.Error.html
+//! [`std::error::Error + Sync + Send + 'static`]: https://doc.rust-lang.org/std/error/trait.Error.html
+//! [`anyhow::bail!`]: https://docs.rs/anyhow/latest/anyhow/macro.bail.html
+//! [`bail!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail.html
+//! [`bail_public!`]: https://docs.rs/mcp-attr/latest/mcp_attr/macro.bail_public.html
+//! [`server_info`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.server_info
+//! [`instructions`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.instructions
+//! [`completion_complete`]: https://docs.rs/mcp-attr/latest/mcp_attr/server/trait.McpServer.html#method.completion_complete
 // #![include_doc("../../README.md", end)]
