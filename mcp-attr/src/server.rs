@@ -13,11 +13,11 @@ use crate::{
     common::McpCancellationHook,
     error::{prompt_not_found, tool_not_found},
     schema::{
-        CallToolRequestParams, CallToolResult, CancelledNotificationParams, CompleteRequestParams,
-        CompleteResult, CreateMessageRequestParams, CreateMessageResult, GetPromptRequestParams,
-        GetPromptResult, Implementation, InitializeRequestParams, InitializeResult,
-        InitializedNotificationParams, ListPromptsRequestParams, ListPromptsResult,
-        ListResourceTemplatesRequestParams, ListResourceTemplatesResult,
+        CallToolRequestParams, CallToolResult, CancelledNotificationParams, ClientCapabilities,
+        CompleteRequestParams, CompleteResult, CreateMessageRequestParams, CreateMessageResult,
+        GetPromptRequestParams, GetPromptResult, Implementation, InitializeRequestParams,
+        InitializeResult, InitializedNotificationParams, ListPromptsRequestParams,
+        ListPromptsResult, ListResourceTemplatesRequestParams, ListResourceTemplatesResult,
         ListResourcesRequestParams, ListResourcesResult, ListRootsRequestParams, ListRootsResult,
         ListToolsRequestParams, ListToolsResult, PingRequestParams, ProgressNotificationParams,
         ReadResourceRequestParams, ReadResourceResult, Root, ServerCapabilities,
@@ -32,7 +32,7 @@ pub use mcp_server_attr::mcp_server;
 
 struct McpServerHandler {
     server: Arc<dyn DynMcpServer>,
-    is_initialize: bool,
+    initialize: Option<Arc<InitializeRequestParams>>,
     is_initizlized: bool,
 }
 impl Handler for McpServerHandler {
@@ -50,19 +50,22 @@ impl Handler for McpServerHandler {
             "ping" => return cx.handle(self.ping(params.to_opt()?)),
             _ => {}
         }
-        if !self.is_initizlized {
+        let (Some(initialize), true) = (&self.initialize, self.is_initizlized) else {
             bail_public!(_, "Server not initialized");
-        }
+        };
+        let i = initialize.clone();
         match method {
-            "prompts/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_prompts_list(p, cx)),
-            "prompts/get" => self.call(params, cx, |s, p, cx| s.dyn_prompts_get(p, cx)),
-            "resources/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_resources_list(p, cx)),
-            "resources/templates/list" => {
-                self.call_opt(params, cx, |s, p, cx| s.dyn_resources_templates_list(p, cx))
+            "prompts/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_prompts_list(p, cx, i)),
+            "prompts/get" => self.call(params, cx, |s, p, cx| s.dyn_prompts_get(p, cx, i)),
+            "resources/list" => {
+                self.call_opt(params, cx, |s, p, cx| s.dyn_resources_list(p, cx, i))
             }
-            "resources/read" => self.call(params, cx, |s, p, cx| s.dyn_resources_read(p, cx)),
-            "tools/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_tools_list(p, cx)),
-            "tools/call" => self.call(params, cx, |s, p, cx| s.dyn_tools_call(p, cx)),
+            "resources/templates/list" => self.call_opt(params, cx, |s, p, cx| {
+                s.dyn_resources_templates_list(p, cx, i)
+            }),
+            "resources/read" => self.call(params, cx, |s, p, cx| s.dyn_resources_read(p, cx, i)),
+            "tools/list" => self.call_opt(params, cx, |s, p, cx| s.dyn_tools_list(p, cx, i)),
+            "tools/call" => self.call(params, cx, |s, p, cx| s.dyn_tools_call(p, cx, i)),
             _ => cx.method_not_found(),
         }
     }
@@ -83,7 +86,7 @@ impl McpServerHandler {
     pub fn new(server: impl McpServer) -> Self {
         Self {
             server: Arc::new(server),
-            is_initialize: false,
+            initialize: None,
             is_initizlized: false,
         }
     }
@@ -93,11 +96,11 @@ impl McpServerHandler {
         if p.protocol_version != PROTOCOL_VERSION {
             bail_public!(ErrorCode::INVALID_PARAMS, "Unsupported protocol version");
         }
-        self.is_initialize = true;
+        self.initialize = Some(Arc::new(p));
         Ok(self.server.initialize_result())
     }
     fn initialized(&mut self, _p: Option<InitializedNotificationParams>) -> Result<()> {
-        if !self.is_initialize {
+        if self.initialize.is_none() {
             bail_public!(
                 _,
                 "`initialize` request must be called before `initialized` notification"
@@ -171,42 +174,49 @@ trait DynMcpServer: Send + Sync + 'static {
         self: Arc<Self>,
         p: ListPromptsRequestParams,
         cx: RequestContextAs<ListPromptsResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_prompts_get(
         self: Arc<Self>,
         p: GetPromptRequestParams,
         cx: RequestContextAs<GetPromptResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_resources_list(
         self: Arc<Self>,
         p: ListResourcesRequestParams,
         cx: RequestContextAs<ListResourcesResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_resources_read(
         self: Arc<Self>,
         p: ReadResourceRequestParams,
         cx: RequestContextAs<ReadResourceResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_resources_templates_list(
         self: Arc<Self>,
         p: ListResourceTemplatesRequestParams,
         cx: RequestContextAs<ListResourceTemplatesResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_tools_list(
         self: Arc<Self>,
         p: ListToolsRequestParams,
         cx: RequestContextAs<ListToolsResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 
     fn dyn_tools_call(
         self: Arc<Self>,
         p: CallToolRequestParams,
         cx: RequestContextAs<CallToolResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response>;
 }
 impl<T: McpServer> DynMcpServer for T {
@@ -223,8 +233,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: ListPromptsRequestParams,
         cx: RequestContextAs<ListPromptsResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.prompts_list(p, &mut mpc_cx).await })
     }
 
@@ -232,8 +243,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: GetPromptRequestParams,
         cx: RequestContextAs<GetPromptResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.prompts_get(p, &mut mpc_cx).await })
     }
 
@@ -241,8 +253,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: ListResourcesRequestParams,
         cx: RequestContextAs<ListResourcesResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.resources_list(p, &mut mpc_cx).await })
     }
 
@@ -250,8 +263,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: ListResourceTemplatesRequestParams,
         cx: RequestContextAs<ListResourceTemplatesResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.resources_templates_list(p, &mut mpc_cx).await })
     }
 
@@ -259,8 +273,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: ReadResourceRequestParams,
         cx: RequestContextAs<ReadResourceResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.resources_read(p, &mut mpc_cx).await })
     }
 
@@ -268,8 +283,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: ListToolsRequestParams,
         cx: RequestContextAs<ListToolsResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.tools_list(p, &mut mpc_cx).await })
     }
 
@@ -277,8 +293,9 @@ impl<T: McpServer> DynMcpServer for T {
         self: Arc<Self>,
         p: CallToolRequestParams,
         cx: RequestContextAs<CallToolResult>,
+        initialize: Arc<InitializeRequestParams>,
     ) -> Result<Response> {
-        let mut mpc_cx = RequestContext::new(&cx);
+        let mut mpc_cx = RequestContext::new(&cx, initialize);
         cx.handle_async(async move { self.tools_call(p, &mut mpc_cx).await })
     }
 }
@@ -388,14 +405,26 @@ pub trait McpServer: Send + Sync + 'static {
 pub struct RequestContext {
     session: SessionContext,
     id: RequestId,
+    initialize: Arc<InitializeRequestParams>,
 }
 impl RequestContext {
-    fn new(cx: &RequestContextAs<impl Serialize>) -> Self {
+    fn new(
+        cx: &RequestContextAs<impl Serialize>,
+        initialize: Arc<InitializeRequestParams>,
+    ) -> Self {
         Self {
             session: cx.session(),
             id: cx.id().clone(),
+            initialize,
         }
     }
+    pub fn client_info(&self) -> &Implementation {
+        &self.initialize.client_info
+    }
+    pub fn client_capabilities(&self) -> &ClientCapabilities {
+        &self.initialize.capabilities
+    }
+
     pub fn progress(&self, progress: f64, total: Option<f64>) {
         self.session
             .notification(
