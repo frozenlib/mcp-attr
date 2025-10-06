@@ -4,4 +4,4 @@ resolver = "3"
 
 [workspace.dependencies]
 uri-template-ex = "0.0.2"
-schemars = "0.8.22"
+schemars = "1.0.4"

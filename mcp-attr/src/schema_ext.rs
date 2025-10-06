@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 
 use jsoncall::{ErrorCode, bail_public};
-use schemars::{JsonSchema, r#gen::SchemaSettings, schema::Metadata};
+use schemars::{JsonSchema, generate::SchemaSettings};
 use serde::Serialize;
 use serde_json::{Value, to_value};
 use url::Url;
@@ -299,16 +299,16 @@ impl ToolInputSchema {
         let mut settings = SchemaSettings::default();
         settings.inline_subschemas = true;
         let g = settings.into_generator();
-        let mut root = g.into_root_schema_for::<T>();
+        let mut value = g.into_root_schema_for::<T>().to_value();
 
         if !description.is_empty() {
-            let metadata = root
-                .schema
-                .metadata
-                .get_or_insert(Box::new(Metadata::default()));
-            metadata.description = Some(description.to_string());
+            if let Value::Object(ref mut object) = value {
+                object.insert(
+                    "description".to_string(),
+                    Value::String(description.to_string()),
+                );
+            }
         }
-        let value = to_value(root.schema)?;
         let Value::Object(obj) = value else {
             bail_public!(
                 ErrorCode::INVALID_PARAMS,
